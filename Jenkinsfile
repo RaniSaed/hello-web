@@ -7,7 +7,7 @@ pipeline {
         DEV_REPO_URL          = 'https://github.com/RaniSaed/hello-web.git'
         CONFIG_REPO_URL       = 'https://github.com/RaniSaed/hello-web-config.git'
         DOCKER_CREDENTIALS_ID = 'dockerhub-creds'
-        GITHUB_PUSH_TOKEN_ID  = 'github-push-token'
+        GITHUB_PUSH_TOKEN_ID  = 'github-creds'
         CONFIG_FILE_PATH      = 'k8s/deployment.yaml'
     }
 
