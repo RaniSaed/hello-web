@@ -2,11 +2,11 @@ pipeline {
   agent any
 
   environment {
-    DOCKERHUB_REPO = 'rani19/hello-web'       
-    DOCKER_CRED_ID = 'dockerhub-creds'        
-    GIT_CRED_ID    = 'github-creds'           
-    CONFIG_REPO    = 'https://github.com/RaniSaed>/hello-web-config.git'
-    CONFIG_PATH    = 'k8s/deployment.yaml'    
+    DOCKERHUB_REPO = 'rani19/hello-web'
+    DOCKER_CRED_ID = 'dockerhub-creds'
+    GIT_CRED_ID    = 'github-creds'
+    CONFIG_REPO    = 'https://github.com/RaniSaed/hello-web-config.git'
+    CONFIG_PATH    = 'k8s/deployment.yaml'
   }
 
   stages {
@@ -42,14 +42,13 @@ pipeline {
       steps {
         dir('hello-web-config') {
           git url: CONFIG_REPO, branch: 'main', credentialsId: GIT_CRED_ID
-          // Replace image tag in deployment manifest
           sh """
-            sed -i.bak -E "s|(image:\s*${DOCKERHUB_REPO}:).*|\\1${IMAGE_TAG}|" ${CONFIG_PATH}
+            sed -i.bak -E "s|^\\s*image:\\s*.*$|image: ${DOCKERHUB_REPO}:${IMAGE_TAG}|" ${CONFIG_PATH}
             rm -f ${CONFIG_PATH}.bak
-            git config user.email "Rani.saed19@gmail.com"
+            git config user.email "jenkins@local"
             git config user.name  "Jenkins CI"
             git add ${CONFIG_PATH}
-            git commit -m "ci: update image tag to ${IMAGE_TAG}"
+            git commit -m "ci: update image tag to ${IMAGE_TAG}" || echo "No changes to commit"
             git push origin main
           """
         }
