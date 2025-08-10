@@ -7,7 +7,7 @@ pipeline {
         DEV_REPO_URL          = 'https://github.com/RaniSaed/hello-web.git'
         CONFIG_REPO_URL       = 'https://github.com/RaniSaed/hello-web-config.git'
         DOCKER_CREDENTIALS_ID = 'dockerhub-creds'
-        GITHUB_PUSH_TOKEN_ID  = 'github-creds'
+        GITHUB_CREDENTIALS_ID = 'github-creds'
         CONFIG_FILE_PATH      = 'k8s/deployment.yaml'
     }
 
@@ -101,21 +101,20 @@ pipeline {
         stage('Commit & Push Changes') {
             steps {
                 dir('config') {
-                    withCredentials([string(credentialsId: "${GITHUB_PUSH_TOKEN_ID}", variable: 'GIT_TOKEN')]) {
-                        script {
-                            sh """
-                              git config user.email 'rani.saed19@gmail.com'
-                              git config user.name  'Rani Saed (CI/CD)'
-                              git add ${CONFIG_FILE_PATH}
-                              if ! git diff --cached --quiet; then
-                                git commit -m 'ci: update hello-web image to ${IMAGE_NAME}:${TAG}'
-                                git remote set-url origin https://${GIT_TOKEN}@github.com/RaniSaed/hello-web-config.git
-                                git push origin main
-                              else
-                                echo 'No changes to commit.'
-                              fi
-                            """
-                        }
+                    withCredentials([usernamePassword(credentialsId: "${GITHUB_CREDENTIALS_ID}", usernameVariable: 'GIT_USER', passwordVariable: 'GIT_TOKEN')]) {
+                        sh """
+                          set -e
+                          git config user.email 'rani.saed19@gmail.com'
+                          git config user.name  'Rani Saed (CI/CD)'
+                          git add ${CONFIG_FILE_PATH}
+                          if ! git diff --cached --quiet; then
+                            git commit -m 'ci: update hello-web image to ${IMAGE_NAME}:${TAG}'
+                            git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/RaniSaed/hello-web-config.git
+                            git push origin main
+                          else
+                            echo 'No changes to commit.'
+                          fi
+                        """
                     }
                 }
             }
